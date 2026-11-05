@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#070b22">
+<title>Trivial Publicacion Web y Wordpress</title>
+<style>
+:root{
+  --bg:#070b22; --bg2:#0d1438; --card:#121a47; --card2:#1a2360;
+  --cyan:#22d3ee; --cyan-d:#0891b2; --violet:#8b5cf6; --violet-d:#6d28d9;
+  --text:#e8edff; --muted:#9aa6d6; --ok:#22c55e; --ok-bg:rgba(34,197,94,.15);
+  --bad:#ef4444; --bad-bg:rgba(239,68,68,.15); --gold:#fbbf24;
+  --radius:18px; --shadow:0 10px 30px rgba(0,0,0,.45);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%}
+body{
+  min-height:100vh;min-height:100dvh;
+  background:
+    radial-gradient(900px 500px at 85% -10%,rgba(139,92,246,.28),transparent 60%),
+    radial-gradient(800px 500px at -10% 10%,rgba(34,211,238,.20),transparent 60%),
+    var(--bg);
+  color:var(--text);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  line-height:1.45;
+  padding-top:env(safe-area-inset-top);
+}
+#app{max-width:720px;margin:0 auto;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
+.screen{flex:1;padding:16px 16px calc(120px + env(safe-area-inset-bottom));animation:fadeIn .4s ease both}
+.hidden{display:none!important}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* Bienvenida */
+.hero{text-align:center;padding-top:8vh}
+.logo{font-size:84px;line-height:1;filter:drop-shadow(0 0 24px rgba(34,211,238,.6));animation:float 3.5s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+h1{font-size:clamp(28px,7vw,40px);margin:14px 0 8px;line-height:1.15;
+  background:linear-gradient(90deg,var(--cyan),var(--violet));-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:var(--muted);font-size:16px;margin:0 auto 18px;max-width:520px}
+.tags{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:16px 0}
+.tag{background:rgba(139,92,246,.18);border:1px solid rgba(139,92,246,.5);color:#d9ccff;padding:8px 14px;border-radius:999px;font-weight:600;font-size:14px}
+.notice{background:var(--card);border:1px solid rgba(34,211,238,.3);border-radius:var(--radius);padding:14px 16px;margin:18px auto 0;max-width:520px;box-shadow:var(--shadow);color:var(--text)}
+
+/* Cabecera juego */
+.hud{position:sticky;top:0;z-index:5;background:linear-gradient(var(--bg),rgba(7,11,34,.92));padding:10px 0 8px;backdrop-filter:blur(6px)}
+.hud-row{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;font-weight:700}
+.chip{background:var(--card);border:1px solid rgba(255,255,255,.08);border-radius:999px;padding:6px 12px;font-size:14px;white-space:nowrap}
+.chip b{color:var(--cyan)}
+.chip.streak{border-color:rgba(251,191,36,.5);color:var(--gold)}
+.chip.streak.hot{box-shadow:0 0 16px rgba(251,191,36,.5)}
+.progress{height:10px;border-radius:999px;background:var(--card);overflow:hidden}
+.progress>i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--cyan),var(--violet));border-radius:999px;transition:width .5s ease}
+.qcount{font-size:13px;color:var(--muted);margin-top:6px;text-align:center}
+
+/* Tarjeta pregunta */
+.qcard{background:linear-gradient(160deg,var(--card),var(--card2));border:1px solid rgba(255,255,255,.08);border-radius:var(--radius);padding:18px;margin:12px 0;box-shadow:var(--shadow)}
+.mod{display:inline-block;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--cyan);background:rgba(34,211,238,.12);padding:4px 10px;border-radius:999px;margin-bottom:10px}
+.sbadge{display:inline-block;margin:0 0 10px 6px;font-size:13px;font-weight:800;padding:4px 12px;border-radius:999px;background:linear-gradient(90deg,var(--violet),var(--cyan));color:#fff;animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{50%{transform:scale(1.06)}}
+.qtext{font-size:clamp(18px,4.6vw,22px);font-weight:700;margin:0}
+.options{display:grid;gap:10px;margin-top:14px}
+.opt{
+  display:flex;align-items:center;gap:12px;text-align:left;width:100%;
+  min-height:60px;padding:12px 14px;border-radius:16px;
+  background:var(--bg2);color:var(--text);border:2px solid rgba(139,92,246,.35);
+  font:inherit;font-size:16px;cursor:pointer;
+  transition:transform .15s ease,border-color .2s,background .2s,box-shadow .2s;
+}
+.opt:hover:not(:disabled){border-color:var(--cyan);transform:translateY(-1px)}
+.opt:active:not(:disabled){transform:scale(.985)}
+.opt .l{flex:0 0 34px;height:34px;border-radius:10px;display:grid;place-items:center;font-weight:800;background:linear-gradient(135deg,var(--violet-d),var(--cyan-d));color:#fff}
+.opt:disabled{cursor:default}
+.opt.dim{opacity:.45}
+.opt.gone{opacity:.18;text-decoration:line-through;filter:grayscale(1)}
+.opt.ok{background:var(--ok-bg);border-color:var(--ok);box-shadow:0 0 0 3px rgba(34,197,94,.25);opacity:1;animation:pop .35s ease}
+.opt.bad{background:var(--bad-bg);border-color:var(--bad);opacity:1;animation:shake .4s ease}
+@keyframes pop{50%{transform:scale(1.03)}}
+@keyframes shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+
+/* Feedback */
+.fb{border-radius:var(--radius);padding:14px 16px;margin-top:12px;animation:fadeIn .35s ease both;border:2px solid}
+.fb.ok{background:var(--ok-bg);border-color:var(--ok)}
+.fb.bad{background:var(--bad-bg);border-color:var(--bad)}
+.fb h3{margin:0 0 4px;font-size:19px}
+.fb p{margin:2px 0}
+.expl{background:var(--card);border-left:5px solid var(--violet);border-radius:14px;padding:14px 16px;margin-top:12px;animation:fadeIn .35s ease both}
+.expl h4{margin:0 0 6px;color:#c4b5fd}
+.extra{margin-top:12px;border-radius:var(--radius);padding:14px 16px;animation:fadeIn .35s ease both;background:linear-gradient(135deg,rgba(139,92,246,.25),rgba(34,211,238,.18));border:1px solid rgba(255,255,255,.15)}
+.extra h4{margin:0 0 6px}
+
+/* Barra inferior */
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:20;padding:12px 16px calc(12px + env(safe-area-inset-bottom));
+  background:linear-gradient(transparent,rgba(7,11,34,.96) 35%);}
+.bar-in{max-width:720px;margin:0 auto}
+.main{
+  width:100%;min-height:64px;border:0;border-radius:18px;font:inherit;font-size:19px;font-weight:800;color:#fff;cursor:pointer;
+  background:linear-gradient(90deg,var(--violet),var(--cyan-d));box-shadow:0 8px 24px rgba(34,211,238,.28);
+  transition:transform .15s,opacity .2s,filter .2s;
+}
+.main:active:not(:disabled){transform:scale(.98)}
+.main:disabled{opacity:.4;cursor:not-allowed;filter:grayscale(.5);box-shadow:none}
+
+/* Final */
+.end{text-align:center}
+.big{font-size:clamp(54px,16vw,84px);font-weight:900;line-height:1;margin:6px 0;
+  background:linear-gradient(90deg,var(--cyan),var(--violet));-webkit-background-clip:text;background-clip:text;color:transparent}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0}
+.stat{background:var(--card);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px}
+.stat b{display:block;font-size:24px;color:var(--cyan)}
+.stat span{font-size:13px;color:var(--muted)}
+.msg{background:linear-gradient(135deg,rgba(139,92,246,.25),rgba(34,211,238,.18));border:1px solid rgba(255,255,255,.15);border-radius:var(--radius);padding:16px;font-size:18px;font-weight:600}
+
+/* Modal */
+.modal{position:fixed;inset:0;z-index:50;background:rgba(3,5,18,.82);display:grid;place-items:center;padding:20px;animation:fadeIn .25s ease both}
+.mbox{background:linear-gradient(160deg,var(--card2),var(--card));border:2px solid var(--cyan);border-radius:24px;padding:26px 22px;text-align:center;max-width:380px;width:100%;box-shadow:0 0 50px rgba(139,92,246,.5);animation:zoom .45s cubic-bezier(.2,1.4,.4,1) both}
+@keyframes zoom{from{transform:scale(.6);opacity:0}to{transform:none;opacity:1}}
+.mbox .ico{font-size:72px;animation:float 2s ease-in-out infinite}
+.mbox h2{margin:6px 0;color:var(--cyan)}
+.mbox p{color:var(--text);margin:6px 0 18px}
+
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:60;width:100%;height:100%}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+}
+:focus-visible{outline:3px solid var(--cyan);outline-offset:2px}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <section id="welcome" class="screen">
+    <div class="hero">
+      <div class="logo" aria-hidden="true">🌐</div>
+      <h1>Trivial Publicacion Web y Wordpress</h1>
+      <p class="sub">Módulo de Publicacion de páginas web MF0952_2. Pon a prueba lo que sabes sobre dominios, hosting, FTP y WordPress.</p>
+      <div class="tags">
+        <span class="tag">🌍 Internet y DNS</span>
+        <span class="tag">🖥️ Hosting y FTP</span>
+        <span class="tag">🔒 SSL y seguridad</span>
+        <span class="tag">📝 WordPress</span>
+      </div>
+      <div class="notice">🎲 Las preguntas y las respuestas salen <b>en orden aleatorio</b> y te esperan <b>sorpresas</b> por el camino: comodines, escudos, cofres y algún chiste.<br><small id="totalInfo"></small></div>
+    </div>
+  </section>
+
+  <section id="game" class="screen hidden">
+    <div class="hud">
+      <div class="hud-row">
+        <span class="chip">⭐ <b id="score">0</b> pts</span>
+        <span class="chip streak" id="streakChip">🔥 Racha: <b id="streak">0</b> · ×<b id="mult">1</b></span>
+      </div>
+      <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" id="pbar"><i id="pfill"></i></div>
+      <div class="qcount" id="qcount"></div>
+    </div>
+    <div class="qcard">
+      <div><span class="mod" id="mod"></span><span class="sbadge hidden" id="sbadge"></span></div>
+      <p class="qtext" id="qtext"></p>
+      <div class="options" id="options"></div>
+    </div>
+    <div id="feedback"></div>
+  </section>
+
+  <section id="end" class="screen end hidden">
+    <div class="logo" aria-hidden="true" id="endEmoji">🏆</div>
+    <h1>¡Desafío completado!</h1>
+    <div class="big" id="endScore">0</div>
+    <div style="color:var(--muted)">puntos totales</div>
+    <div class="grid">
+      <div class="stat"><b id="endPct">0%</b><span>de aciertos</span></div>
+      <div class="stat"><b id="endHits">0/0</b><span>aciertos / total</span></div>
+      <div class="stat"><b id="endBest">0</b><span>mejor racha</span></div>
+      <div class="stat"><b id="endSur">0</b><span>sorpresas encontradas</span></div>
+    </div>
+    <div class="msg" id="endMsg"></div>
+  </section>
+
+  <div class="bar"><div class="bar-in"><button class="main" id="mainBtn">Iniciar Desafío</button></div></div>
+</div>
+<canvas id="confetti" aria-hidden="true"></canvas>
+<div id="modalRoot"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ═════════ DATOS ═════════ */
+var MOD = {W:"🌍 Publicación Web", P:"📝 WordPress"};
+var JOKE_COUNT = 10;
+var RAW = [
+// ---------- PARTE 1: PUBLICACIÓN WEB ----------
+["W",`¿Qué función cumple el DNS en la arquitectura de la red?`,[`Almacena las bases de datos de la web.`,`Traduce el dominio en una dirección IP numérica.`,`Cifra los datos mediante certificados de seguridad.`,`Gestiona el envío de ficheros vía FTP.`],"B",`El DNS actúa como el GPS de la web, traduciendo nombres comprensibles (como miweb.com) a coordenadas IP.`],
+["W",`¿Cómo se denomina el directorio raíz público principal en cPanel donde deben alojarse los archivos web?`,[`/httpdocs/`,`/public_html/`,`/www/root/`,`/index/`],"B",`En cPanel, public_html es la carpeta pública o escaparate donde todo lo depositado se publica instantáneamente en Internet.`],
+["W",`¿Cuál es la regla de oro obligatoria para nombrar al archivo de inicio de una web?`,[`inicio.html en mayúsculas`,`index.html o index.php en minúsculas`,`home.php sin restricciones`,`principal.html con espacios`],"B",`El servidor distingue mayúsculas de minúsculas, por lo que el archivo principal debe llamarse estrictamente index.html o index.php en minúsculas.`],
+["W",`¿Qué puerto se utiliza por defecto para conexiones FTP estándar?`,[`Puerto 22`,`Puerto 80`,`Puerto 21`,`Puerto 443`],"C",`El puerto 21 se emplea para conexiones FTP estándar, mientras que el puerto 22 se reserva para SFTP cifrado.`],
+["W",`¿Qué ventaja ofrece subir un archivo comprimido .zip en lugar de carpetas sueltas mediante cPanel?`,[`Evita que se usen bases de datos MySQL.`,`Agiliza la subida y permite extraer y eliminar el zip para liberar espacio.`,`Aumenta el límite de peso permitido a 10 GB.`,`Desactiva automáticamente el protocolo SSL.`],"B",`Con cPanel se puede subir un .zip pesado, extraerlo de forma nativa en el servidor y borrar el original para ahorrar espacio.`],
+["W",`¿Qué acción correctiva se debe aplicar si al entrar a una web se visualiza una lista de archivos y carpetas en lugar de la página?`,[`Cambiar el certificado SSL.`,`Comprobar que el archivo principal se llame exactamente index.html.`,`Borrar la base de datos MySQL.`,`Vaciar la caché con Ctrl + F5.`],"B",`Si el servidor no encuentra un archivo index.html o index.php válido por defecto, muestra el listado de directorios.`],
+["W",`¿Qué se debe hacer si tras actualizar una web en producción sigue apareciendo la versión antigua?`,[`Reiniciar el servidor VPS.`,`Forzar la recarga del navegador presionando Ctrl + F5 (limpiar caché).`,`Modificar el archivo wp-config.php.`,`Cambiar el puerto FTP de 21 a 22.`],"B",`La caché del navegador suele almacenar versiones pasadas; Ctrl + F5 fuerza la descarga de los nuevos ficheros.`],
+["W",`En la analogía del restaurante del modelo cliente-servidor, ¿a qué equivale el navegador web (Cliente)?`,[`La cocina y el chef preparando los platos.`,`El comensal que lee el menú (URL) y hace un pedido.`,`El camarero transportando la comanda.`,`Los ingredientes de la despensa.`],"B",`El navegador actúa como el comensal que solicita los recursos a través de una petición HTTP.`],
+["W",`¿Qué representa el protocolo HTTP dentro de la analogía del restaurante?`,[`El edificio físico del hosting.`,`El camarero que transporta la comanda de forma estructurada.`,`La base de datos SQL.`,`El dominio o dirección postal.`],"B",`HTTP actúa como el canal de comunicación o camarero que lleva la petición del cliente al servidor y devuelve la respuesta.`],
+["W",`¿Qué diferencia fundamental existe entre abrir un HTML haciendo doble clic frente a usar Localhost?`,[`El doble clic usa protocolo de red HTTP y Localhost no.`,`El doble clic abre un archivo local (file://) sin servidor ni procesamiento de PHP.`,`Localhost no permite ver imágenes ni hojas de estilo CSS.`,`No hay ninguna diferencia técnica operativa.`],"B",`El doble clic usa el protocolo file:// actuando como un visor cerrado, mientras que localhost activa un servidor web real simulando Internet.`],
+["W",`¿Cuál es la dirección IP de bucle local (Loopback) utilizada para entornos de desarrollo en localhost?`,[`192.168.1.1`,`10.0.0.255`,`127.0.0.1`,`8.8.8.8`],"C",`La IP 127.0.0.1 (loopback) redirige la petición a través de la interfaz de red virtual del propio ordenador hacia el servidor local.`],
+["W",`¿Por qué un entorno de servidor local (como XAMPP o Live Server) es indispensable para trabajar con WordPress o PHP?`,[`Porque permite comprar dominios .es gratis.`,`Porque los navegadores puros no pueden interpretar código de servidor ni conectar con bases de datos.`,`Porque el doble clic acelera la velocidad del procesador.`,`Porque elimina la necesidad de usar contraseñas FTP.`],"B",`Los lenguajes dinámicos como PHP requieren un intérprete de servidor activo (como Apache) para procesar la lógica antes de enviarla al navegador.`],
+["W",`¿Qué tipo de alojamiento web ofrece un entorno virtualizado con recursos dedicados y escalables, orientado a perfiles técnicos?`,[`Hosting Compartido`,`Servidor VPS`,`Servidor Dedicado`,`Cloud Hosting`],"B",`El VPS (Servidor Privado Virtual) funciona como un apartamento propio con recursos escalables, requiriendo conocimientos técnicos intermedios.`],
+["W",`¿Qué opción de hosting ofrece hardware físico exclusivo y máximo rendimiento para grandes tiendas online?`,[`Hosting Compartido`,`Servidor VPS`,`Servidor Dedicado`,`Google Drive`],"C",`El servidor dedicado es un ordenador exclusivo de alta potencia (el equivalente a un chalet privado) para proyectos masivos.`],
+["W",`¿Por qué es fundamental el Certificado SSL en un sitio web actual?`,[`Para aumentar el espacio en disco duro del hosting.`,`Para cifrar los datos de los usuarios y cumplir con exigencias de seguridad y SEO (HTTPS).`,`Para evitar que caduque el nombre del dominio.`,`Para acelerar la subida masiva de archivos vía FTP.`],"B",`El certificado SSL habilita HTTPS, protegiendo la información sensible e indexándose mejor en los buscadores.`],
+["W",`En un despliegue de WordPress, ¿cuáles son los dos grandes pilares que se deben conectar?`,[`El archivo index.html y la carpeta de imágenes.`,`Los archivos web en public_html y la Base de Datos MySQL.`,`El cliente FTP y el servidor de correo electrónico.`,`El dominio global y la extensión geográfica ccTLD.`],"B",`Un CMS dinámico requiere enlazar la estructura de ficheros de la aplicación con la base de datos a través de un archivo de configuración.`],
+["W",`¿Cómo se vinculan los archivos web de WordPress con su base de datos?`,[`Modificando el archivo de configuración wp-config.php con las credenciales correctas.`,`Renombrando la carpeta public_html a base_datos.`,`Subiendo un archivo comprimido .zip mediante doble clic.`,`Cambiando el puerto del servidor de 21 a 443.`],"A",`El puente de conexión se realiza editando el fichero wp-config.php para reflejar el host, usuario y contraseña de la base de datos MySQL.`],
+["W",`¿Qué herramienta o sección de cPanel se utiliza habitualmente para importar la estructura de una base de datos (.sql)?`,[`Administrador de Archivos`,`phpMyAdmin`,`Cuentas de Correo`,`Instalador Softaculous`],"B",`phpMyAdmin permite acceder a la base de datos creada y utilizar la pestaña "Importar" para volcar el fichero de respaldo local.`],
+["W",`¿Cuál es el tiempo estimado habitual de propagación global del DNS al cambiar de servidor o hosting?`,[`De 1 a 2 segundos`,`De 2 a 4 horas (máximo 48 horas)`,`Exactamente 7 días`,`De 30 a 60 días`],"B",`Tras modificar las DNS, Internet tarda un tiempo en aprender la nueva ruta, estimándose normalmente entre 2 y 4 horas.`],
+["W",`¿Qué se recomienda hacer siempre antes de sobreescribir ficheros críticos en un servidor en producción?`,[`Borrar el archivo index.html permanentemente.`,`Realizar una copia de respaldo (Backup) descargando el contenido previo.`,`Cambiar el nombre del dominio principal.`,`Desactivar el protocolo HTTP.`],"B",`El manifiesto del despliegue seguro exige realizar siempre respaldos locales de seguridad antes de modificar o reemplazar archivos existentes.`],
+["W",`¿Qué herramienta se menciona en el temario como un autoinstalador de 1 clic para desplegar CMS de forma sencilla?`,[`FileZilla`,`Softaculous`,`XAMPP`,`phpMyAdmin`],"B",`Los autoinstaladores como Softaculous permiten desplegar sistemas complejos como WordPress o PrestaShop de manera automatizada.`],
+["W",`¿Cuál es la principal ventaja de utilizar un cliente FTP como FileZilla frente al Administrador de Archivos web?`,[`Tiene un límite estricto de 256 MB por archivo.`,`Permite arrastrar carpetas enteras de gran tamaño sin límite y gestionar proyectos complejos de forma continua.`,`No requiere introducir credenciales de servidor.`,`Funciona haciendo doble clic sin conexión a Internet.`],"B",`FileZilla no tiene límite de peso estricto y facilita la sincronización masiva de proyectos pesados mediante FTP/SFTP.`],
+["W",`¿Qué mide el indicador de "Espacio en Disco" en un servidor de hosting?`,[`La velocidad de procesamiento de consultas complejas.`,`Los Gigabytes disponibles para almacenar imágenes, bases de datos, ficheros y correos.`,`La cantidad de visitantes simultáneos que soporta la RAM.`,`El número de extensiones de dominio permitidas.`],"B",`El espacio en disco representa el volumen físico de almacenamiento en el servidor web para todos los elementos del proyecto.`],
+["W",`¿Qué componentes principales forman parte de un paquete de servidor local tradicional como XAMPP?`,[`Apache, MySQL y PHP`,`HTML, CSS y JavaScript`,`FTP, SFTP y DNS`,`cPanel, Plesk y phpMyAdmin`],"A",`XAMPP integra el servidor web Apache, el gestor de bases de datos MySQL y el intérprete PHP para desarrollo local.`],
+["W",`¿Qué causa común provoca un Error 404 de imagen no encontrada tras subir un proyecto a producción?`,[`Que el archivo index.html está en minúsculas.`,`La sensibilidad a mayúsculas y minúsculas en las rutas (ej. llamar Logo.jpg a un archivo guardado como logo.jpg).`,`La falta de un certificado SSL activo.`,`Usar el puerto 21 en lugar del 22.`],"B",`Los servidores web en la nube distinguen estrictamente mayúsculas de minúsculas, generando fallos si el código no coincide exactamente con el nombre real del archivo.`],
+["W",`¿Qué función cumple la extensión o TLD (Top-Level Domain) dentro de una dirección web?`,[`Indicar el protocolo de seguridad cifrado.`,`Definir la extensión global (.com) o geográfica (.es) del dominio.`,`Configurar la dirección IP del servidor local.`,`Establecer el límite de RAM del hosting.`],"B",`El TLD sitúa la extensión final de la dirección, permitiendo segmentar alcances internacionales (gTLD) o posicionamientos locales (ccTLD).`],
+["W",`¿Por qué se desaconseja el uso de espacios en blanco y caracteres especiales al nombrar ficheros web?`,[`Porque aumentan el consumo de memoria RAM del servidor.`,`Porque pueden corromper las rutas URL y generar errores de carga en los enlaces.`,`Porque impiden la instalación de certificados SSL.`,`Porque bloquean el funcionamiento del protocolo FTP.`],"B",`Una nomenclatura estricta sin espacios ni caracteres especiales previene errores en las rutas de acceso en línea.`],
+["W",`¿Qué ventaja ofrece el flujo de trabajo profesional que combina entorno local y hosting cloud?`,[`Programar directamente en producción expuestos a fallos públicos.`,`Desarrollar y probar de forma gratuita y segura en local antes de migrar el resultado final a la nube para acceso global 24/7.`,`Evitar por completo el uso de navegadores web.`,`Prescindir de la necesidad de dominios y DNS.`],"B",`El ciclo ideal separa las fases: primero se construye de forma iterativa y segura en local, y luego se despliega al servidor público.`],
+["W",`¿Qué política de seguridad de los navegadores bloquea ciertas peticiones a APIs externas si no se usa un entorno con servidor http://?`,[`Política CORS (Cross-Origin Resource Sharing)`,`Política de compresión GZIP`,`Protocolo de transferencia FTP`,`Restricción de caché local`],"A",`Los navegadores aplican restricciones de seguridad estrictas (CORS) cuando se abren ficheros locales puros (file://), requiriendo un entorno de servidor http://.`],
+["W",`¿Qué se evalúa principalmente durante la fase de Quality Assurance (QA) tras realizar un despliegue web?`,[`Que el peso del archivo ZIP local sea superior a 1 GB.`,`Que la página cargue correctamente sin mostrar carpetas y que no existan rutas rotas en recursos gráficos o CSS.`,`Que el servidor local XAMPP siga encendido en el ordenador del alumno.`,`Que el puerto FTP esté configurado en el valor 80.`],"B",`El control de calidad (QA) comprueba la correcta visualización en la URL de producción y la integridad de enlaces y recursos multimedia.`],
+
+// ---------- PARTE 2: WORDPRESS ----------
+["P",`¿Dónde se gestionan los temas gráficos de la web?`,[`Apariencia > Temas`,`Plugins > Temas`,`Ajustes > General`,`Herramientas > Temas`],"A",`La sección Apariencia del panel lateral izquierdo agrupa todas las opciones visuales de la web, siendo Temas el apartado donde se instalan y activan las plantillas del sitio.`],
+["P",`¿Qué menú del panel lateral permite redactar y administrar las entradas del blog?`,[`Páginas`,`Entradas`,`Medios`,`Comentarios`],"B",`El menú Entradas está destinado a la gestión del contenido dinámico y cronológico del sitio web, como artículos de noticias o publicaciones del blog.`],
+["P",`¿Para qué sirve la sección 'Medios' en el menú de WordPress?`,[`Para configurar las redes sociales del sitio web`,`Para instalar reproductores de vídeo externos`,`Para administrar imágenes, audios y archivos subidos`,`Para editar el código fuente de las plantillas`],"C",`La biblioteca de Medios centraliza la gestión de todos los archivos multimedia subidos a la plataforma (imágenes, documentos PDF, audios y vídeos).`],
+["P",`¿Qué tipo de contenido se debe crear habitualmente en el menú 'Páginas'?`,[`Noticias de actualidad que caducan con el tiempo`,`Contenidos estáticos como 'Contacto' o 'Quienes Somos'`,`Listados de etiquetas y categorías de entradas`,`Comentarios de los lectores del sitio web`],"B",`Las Páginas están diseñadas para albergar información fija y permanente de la web que no depende de una fecha de publicación ni utiliza categorías.`],
+["P",`¿Cómo se denominan las unidades estructurales básicas del editor de WordPress?`,[`Secciones`,`Plantillas`,`Bloques`,`Módulos`],"C",`Gutenberg (el editor por bloques de WordPress) organiza todo el contenido (párrafos, imágenes, botones, columnas) mediante el uso de Bloques independientes.`],
+["P",`¿En qué sección del menú lateral se amplían las funciones de WordPress?`,[`Herramientas`,`Ajustes`,`Plugins`,`Apariencia`],"C",`Los Plugins son extensiones de software que permiten añadir nuevas herramientas y funcionalidades específicas al CMS sin necesidad de programar.`],
+["P",`¿Cuál es la función principal de la opción 'Ajustes de Lectura'?`,[`Definir qué contenido se muestra en la portada de la web`,`Cambiar el idioma principal de la plataforma`,`Ajustar el tamaño y tipo de letra de la interfaz`,`Controlar la visibilidad de las imágenes en las páginas`],"A",`En Ajustes > Lectura se establece si la portada mostrará las últimas entradas del blog o una página estática concreta, además de limitar el número de artículos por página.`],
+["P",`¿Qué menú permite importar o exportar contenidos entre diferentes sitios web?`,[`Ajustes > General`,`Herramientas > Importar / Exportar`,`Medios > Biblioteca`,`Plugins > Añadir nuevo`],"B",`El menú Herramientas contiene utilidades avanzadas como Importar y Exportar para migrar contenidos (entradas, páginas, medios) entre instalaciones de WordPress.`],
+["P",`¿Para qué se utilizan las 'Categorías' en las entradas de WordPress?`,[`Para estructurar la jerarquía del menú principal`,`Para agrupar contenidos en temáticas generales`,`Para cambiar la plantilla visual del artículo`,`Para restringir el acceso a usuarios registrados`],"B",`Las Categorías permiten clasificar y organizar las entradas del blog en temas amplios e interrelacionados, facilitando la navegación del usuario.`],
+["P",`¿Cuál es la utilidad principal de las 'Etiquetas' en una entrada?`,[`Añadir palabras clave específicas o microtemas del artículo`,`Asignar el autor principal de la publicación`,`Destacar la entrada en la portada principal`,`Crear hiperenlaces automáticos a webs externas`],"A",`Las Etiquetas (tags) sirven para describir detalles o conceptos específicos que contiene un artículo, funcionando como un índice de términos concretos.`],
+["P",`¿Qué acción realiza el botón 'Publicar' al crear una nueva página?`,[`Guarda un borrador accesible únicamente por el administrador`,`Envía una notificación por correo a los suscriptores`,`Hace la página visible públicamente en el sitio web`,`Descarga una copia de seguridad en el ordenador`],"C",`Al hacer clic en Publicar, el contenido recién creado pasa de estado de borrador o revisión a estar visible para todos los visitantes en la web.`],
+["P",`¿Dónde se configura la estructura de las URL del sitio web (Permalinks)?`,[`Herramientas > Redes`,`Ajustes > Enlaces permanentes`,`Apariencia > Menús`,`Páginas > Ajustes`],"B",`La opción Ajustes > Enlaces permanentes define el formato y la estructura amigable de las direcciones web (URL) para mejorar la usabilidad y el SEO.`],
+["P",`¿Qué función principal cumple el menú 'Usuarios' del panel lateral?`,[`Contar las visitas diarias recibidas en la página`,`Bloquear las direcciones IP no deseadas`,`Administrar cuentas, perfiles y roles de acceso`,`Enviar boletines informativos por correo masivo`],"C",`La sección Usuarios permite dar de alta, editar y asignar distintos niveles de permisos (Administrador, Editor, Autor, etc.) a las personas que acceden al panel.`],
+["P",`¿Qué es un 'Widget' en la estructura tradicional de WordPress?`,[`Un bloque de contenido que se ubica en zonas como laterales o pies`,`Un archivo ejecutable para la instalación de la plantilla`,`Un código informático para la base de datos`,`Una imagen en formato vectorial integrada en la web`],"A",`Los Widgets son pequeños bloques con funciones específicas que se colocan en áreas predefinidas del tema, como la barra lateral (sidebar) o el pie de página (footer).`],
+["P",`¿Qué sucede cuando se envía una entrada o página a la 'Papelera'?`,[`Se elimina definitivamente de la base de datos de inmediato`,`Se oculta temporalmente y se puede restaurar si se desea`,`Se publica en modo privado automáticamente`,`Se convierte en una entrada de blog estándar`],"B",`La Papelera almacena temporalmente los elementos eliminados antes de su borrado permanente, lo que permite recuperarlos en caso de error.`],
+["P",`¿Para qué sirve la opción 'Apariencia > Menús' en el escritorio?`,[`Para diseñar el esquema de colores de la plantilla`,`Para organizar y construir los menús de navegación de la web`,`Para cambiar la disposición de las entradas en el blog`,`Para añadir nuevas tipografías al editor de bloques`],"B",`En Apariencia > Menús se crean y gestionan las estructuras de enlaces de navegación que aparecen habitualmente en la cabecera o pie del sitio web.`],
+["P",`¿Qué muestra la pantalla principal del 'Escritorio' al iniciar sesión?`,[`El código HTML completo de la página de inicio`,`Una vista previa en vivo de la página publicada`,`Un resumen general de la actividad y estado del sitio`,`El panel de facturación del servidor web`],"C",`El Escritorio o Dashboard ofrece un resumen visual del estado de salud de la web, atajos rápidos, actividades recientes y borradores rápidos.`],
+["P",`¿Cuál es la diferencia principal entre 'Entradas' y 'Páginas'?`,[`Las entradas son estáticas y las páginas son cronológicas`,`Las entradas usan categorías y fechas; las páginas son jerárquicas`,`Las páginas admiten imágenes y las entradas solo texto`,`Las entradas requieren plugins adicionales para crearse`],"B",`Las Entradas están pensadas para contenido fechado y organizado por categorías y etiquetas, mientras que las Páginas son estáticas y pueden organizarse en jerarquías (padres/hijos).`],
+["P",`¿Cuál es la función del menú 'Ajustes > General'?`,[`Cambiar el diseño visual de las entradas`,`Modificar la contraseña de todos los usuarios`,`Configurar el título del sitio, el eslogan y la zona horaria`,`Activar los comentarios en todas las publicaciones`],"C",`En Ajustes > General se definen la identidad básica de la web (título y descripción corta), la dirección de correo del administrador y la zona horaria.`],
+["P",`¿Cómo se inserta un nuevo bloque en el editor de contenido de WordPress?`,[`Pulsando la tecla Enter y haciendo clic en el icono '+'`,`Arrastrando un archivo desde la carpeta del ordenador`,`Accediendo a Herramientas > Añadir bloque`,`Presionando únicamente la tecla Tabulador en el teclado`],"A",`En el editor de bloques, al pulsar Enter para una nueva línea o hacer clic en el botón con el icono '+' se abre el insertador para seleccionar cualquier bloque disponible.`]
+];
+
+var QUESTIONS = RAW.map(function(r){
+  return {mod:r[0], q:r[1], opts:r[2], correct:"ABCD".indexOf(r[3]), expl:r[4]};
+});
+var N = QUESTIONS.length;
+
+var JOKES = [
+  "¿Por qué los desarrolladores web prefieren el modo oscuro? Porque la luz atrae a los bugs. 🐛",
+  "Un programador va al súper. Su pareja le dice: «Compra una barra de pan y, si hay huevos, trae seis». Vuelve con seis barras de pan: «¡Es que había huevos!» 🥖",
+  "Error 404: chiste no encontrado… ¡Ah, no, aquí está! 😅",
+  "¿Qué le dijo el CSS al HTML? «Sin mí no eres más que una página aburrida». 🎨",
+  "¿Por qué WordPress fue al gimnasio? Para ponerse fuerte a base de *plugins*. 💪",
+  "¿Cómo se despide un programador web? «¡Hasta el próximo *deploy*… si no se cae el servidor!» 👋",
+  "¿Por qué el FTP nunca se pierde? Porque siempre sabe por qué puerto va: el 21. 🧭",
+  "Mi web funciona perfecta en localhost. Es que allí nadie la critica. 🏠",
+  "¿Por qué el servidor fue al psicólogo? Tenía demasiadas peticiones sin respuesta. 🛋️",
+  "¿Cuál es el animal favorito de un desarrollador web? El *Python*… pero su navegador favorito es el *Fox*. 🦊"
+].slice(0,JOKE_COUNT);
+
+var ENCOURAGE = [
+  "¡Eso es dominar el hosting! 🚀","¡Vas como un rayo por la red! ⚡","¡Servidor feliz, alumno feliz! 😄",
+  "¡Código limpio, mente clara! ✨","¡Así se publica una web! 🌐","¡Sigue así, futuro webmaster! 💻","¡Petición aceptada con un 200 OK! ✅"
+];
+
+var TIERS = [
+  {max:30, emoji:"🌱", msg:"Estás en fase de *localhost*: ¡sigue practicando y vuelve a desplegar tu conocimiento!"},
+  {max:50, emoji:"🛠️", msg:"Buen comienzo. Repasa los conceptos clave y verás cómo suben los puntos."},
+  {max:70, emoji:"📈", msg:"¡Vas por buen camino! Ya tienes una base sólida de publicación web."},
+  {max:90, emoji:"🏅", msg:"¡Muy buen resultado! Dominas casi todo el temario."},
+  {max:101,emoji:"🏆", msg:"¡Nivel webmaster! Resultado excelente, listo para publicar en producción."}
+];
+
+/* ═════════ UTILIDADES ═════════ */
+var $ = function(id){return document.getElementById(id)};
+var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;")}
+function fmt(s){return esc(s).replace(/\*([^*\n]+)\*/g,"<em>$1</em>")}
+function shuffle(a){ // Fisher-Yates
+  a = a.slice();
+  for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t}
+  return a;
+}
+function pick(a){return a[Math.floor(Math.random()*a.length)]}
+function num(n){return String(n).replace(".",",")}
+
+/* ═════════ ESTADO ═════════ */
+var S = {};
+var mainBtn = $("mainBtn");
+var phase = "welcome"; // welcome | question | answered | end
+var modalOpen = false;
+
+function resetState(){
+  S = {
+    order: shuffle(QUESTIONS.map(function(_,i){return i})),
+    idx:0, score:0, streak:0, best:0, hits:0, surprises:0,
+    doubleOn:false, shieldOn:false,
+    lastSurprise:-10, blockCount:{}, jokeDeck:[], cur:null, answered:false
+  };
+}
+
+/* ═════════ FLUJO ═════════ */
+function show(id){
+  ["welcome","game","end"].forEach(function(s){$(s).classList.toggle("hidden",s!==id)});
+  window.scrollTo(0,0);
+}
+
+function startGame(){
+  resetState();
+  clearConfetti();
+  show("game");
+  renderQuestion();
+}
+
+function updateHud(){
+  var mults=[1,1.5,2,2.5,3];
+  $("score").textContent = S.score;
+  $("streak").textContent = S.streak;
+  $("mult").textContent = num(mults[Math.min(S.streak,4)]);
+  $("streakChip").classList.toggle("hot",S.streak>=2);
+  var pct = Math.round((S.idx/N)*100);
+  $("pfill").style.width = pct+"%";
+  $("pbar").setAttribute("aria-valuenow",pct);
+  $("qcount").textContent = "Pregunta "+(S.idx+1)+" de "+N;
+}
+
+function renderQuestion(){
+  var q = QUESTIONS[S.order[S.idx]];
+  var perm = shuffle([0,1,2,3]);
+  S.cur = {q:q, opts:perm.map(function(i){return {text:q.opts[i], ok:i===q.correct, gone:false}})};
+  S.answered = false; S.doubleOn=false; S.shieldOn=false;
+
+  $("mod").textContent = MOD[q.mod]||"";
+  $("sbadge").classList.add("hidden");
+  $("qtext").innerHTML = fmt(q.q);
+  $("feedback").innerHTML = "";
+  var box = $("options"); box.innerHTML="";
+  S.cur.opts.forEach(function(o,i){
+    var b = document.createElement("button");
+    b.className="opt"; b.type="button"; b.dataset.i=i;
+    b.innerHTML = '<span class="l">'+"ABCD"[i]+'</span><span>'+fmt(o.text)+'</span>';
+    b.addEventListener("click",function(){answer(i)});
+    box.appendChild(b);
+  });
+  updateHud();
+  phase="question";
+  mainBtn.disabled = true;
+  mainBtn.textContent = "Elige una respuesta";
+  window.scrollTo(0,0);
+  maybeSurprise();
+}
+
+/* ----- Sorpresas previas ----- */
+function maybeSurprise(){
+  var i = S.idx, blk = Math.floor(i/5);
+  if(i<2 || S.lastSurprise===i-1 || (S.blockCount[blk]||0)>=1) return;
+  if(Math.random()>=0.25) return;
+  S.lastSurprise = i; S.blockCount[blk] = (S.blockCount[blk]||0)+1; S.surprises++;
+  var t = pick(["double","fifty","shield"]);
+  var info = {
+    double:{ico:"⚡",title:"¡Pregunta doble!",txt:"Los puntos de esta pregunta valen ×2.",tag:"⚡ Pregunta doble"},
+    fifty:{ico:"🎁",title:"¡Comodín 50/50 regalado!",txt:"Hemos eliminado dos opciones incorrectas por ti.",tag:"🎁 Comodín 50/50"},
+    shield:{ico:"🛡️",title:"¡Escudo de racha!",txt:"Si fallas esta pregunta, no pierdes tu racha.",tag:"🛡️ Escudo de racha"}
+  }[t];
+  openModal(info.ico,info.title,info.txt,"¡Vamos!",function(){
+    $("sbadge").textContent = info.tag; $("sbadge").classList.remove("hidden");
+    if(t==="double") S.doubleOn=true;
+    if(t==="shield") S.shieldOn=true;
+    if(t==="fifty"){
+      var wrong = shuffle(S.cur.opts.map(function(o,k){return o.ok?-1:k}).filter(function(k){return k>=0})).slice(0,2);
+      var btns = $("options").children;
+      wrong.forEach(function(k){S.cur.opts[k].gone=true;btns[k].disabled=true;btns[k].classList.add("gone")});
+    }
+  });
+}
+
+/* ----- Responder ----- */
+function answer(i){
+  if(S.answered || modalOpen) return;
+  var o = S.cur.opts[i]; if(!o || o.gone) return;
+  S.answered = true;
+  var btns = $("options").children;
+  var correctIdx = S.cur.opts.findIndex(function(x){return x.ok});
+  for(var k=0;k<btns.length;k++){
+    btns[k].disabled = true;
+    if(k===correctIdx) btns[k].classList.add("ok");
+    else if(k===i) btns[k].classList.add("bad");
+    else if(!S.cur.opts[k].gone) btns[k].classList.add("dim");
+  }
+  var mults=[1,1.5,2,2.5,3];
+  var fb = document.createElement("div");
+  var html = "";
+  if(o.ok){
+    var m = mults[Math.min(S.streak,4)];
+    var pts = Math.round(100*m*(S.doubleOn?2:1));
+    S.score += pts; S.streak++; S.hits++; S.best = Math.max(S.best,S.streak);
+    fb.className="fb ok";
+    html = '<h3>✅ ¡Correcto!</h3><p><b>+'+pts+' puntos</b>'+(m>1?' (racha ×'+num(m)+')':'')+(S.doubleOn?' · ⚡ ×2':'')+'</p><p>'+esc(pick(ENCOURAGE))+'</p>';
+  } else {
+    fb.className="fb bad";
+    var lost;
+    if(S.shieldOn){ lost = "🛡️ ¡Tu escudo ha protegido la racha!"; }
+    else { S.streak = 0; lost = "Pierdes la racha."; }
+    html = '<h3>❌ Incorrecto</h3><p>La respuesta correcta era: <b>'+fmt(S.cur.opts[correctIdx].text)+'</b></p><p>'+lost+'</p>';
+  }
+  fb.innerHTML = html;
+  var fbRoot = $("feedback"); fbRoot.innerHTML=""; fbRoot.appendChild(fb);
+
+  var ex = document.createElement("div"); ex.className="expl";
+  ex.innerHTML = '<h4>💡 Explicación didáctica</h4><div>'+fmt(S.cur.q.expl)+'</div>';
+  fbRoot.appendChild(ex);
+
+  // Sorpresas posteriores
+  var r = Math.random(), extra=null;
+  if(o.ok){
+    if(r<0.18){
+      var bonus = pick([50,100,150,200]); S.score += bonus; S.surprises++;
+      extra = '<h4>🎁 ¡Cofre sorpresa!</h4><p>Has encontrado <b>+'+bonus+' puntos</b> extra.</p>';
+      burst();
+    } else if(r<0.35){ extra = jokeCard(); }
+  } else if(r<0.40){ extra = jokeCard(); }
+  if(extra){
+    var ec = document.createElement("div"); ec.className="extra"; ec.innerHTML=extra; fbRoot.appendChild(ec);
+  }
+  updateHud();
+  phase="answered";
+  mainBtn.disabled=false;
+  mainBtn.textContent = (S.idx===N-1) ? "Ver Resultados" : "Siguiente Pregunta";
+  if(o.ok && !extra) burstSmall();
+  setTimeout(function(){fb.scrollIntoView({behavior:reduce?"auto":"smooth",block:"center"})},60);
+}
+
+function jokeCard(){
+  S.surprises++;
+  if(!S.jokeDeck.length) S.jokeDeck = shuffle(JOKES);
+  return '<h4>😂 Pausa de humor</h4><p>'+fmt(S.jokeDeck.pop())+'</p>';
+}
+
+function next(){
+  if(S.idx>=N-1){ finish(); return; }
+  S.idx++; renderQuestion();
+}
+
+function finish(){
+  phase="end";
+  var pct = Math.round(S.hits/N*100);
+  var tier = TIERS.find(function(t){return pct<t.max});
+  $("endScore").textContent = S.score;
+  $("endPct").textContent = pct+"%";
+  $("endHits").textContent = S.hits+"/"+N;
+  $("endBest").textContent = S.best;
+  $("endSur").textContent = S.surprises;
+  $("endMsg").innerHTML = fmt(tier.msg);
+  $("endEmoji").textContent = tier.emoji;
+  show("end");
+  mainBtn.disabled=false;
+  mainBtn.textContent="Reintentar Desafío";
+  if(pct>=70) setTimeout(burst,300);
+}
+
+/* ═════════ MODAL ═════════ */
+function openModal(ico,title,txt,btn,cb){
+  modalOpen = true;
+  var root=$("modalRoot");
+  root.innerHTML='<div class="modal" role="dialog" aria-modal="true"><div class="mbox"><div class="ico">'+ico+'</div><h2>'+esc(title)+'</h2><p>'+esc(txt)+'</p><button class="main" id="mOk">'+esc(btn)+'</button></div></div>';
+  var b=$("mOk"); b.focus();
+  b.addEventListener("click",function(){root.innerHTML="";modalOpen=false;cb&&cb()});
+}
+
+/* ═════════ CONFETI ═════════ */
+var cv=$("confetti"), cx=cv.getContext("2d"), parts=[], raf=null;
+function sizeCv(){cv.width=innerWidth*devicePixelRatio;cv.height=innerHeight*devicePixelRatio}
+window.addEventListener("resize",sizeCv); sizeCv();
+function burst(n){ spawn(n||140) }
+function burstSmall(){ spawn(25) }
+function spawn(n){
+  if(reduce) return;
+  var cols=["#22d3ee","#8b5cf6","#fbbf24","#22c55e","#f472b6","#ffffff"];
+  var d=devicePixelRatio;
+  for(var i=0;i<n;i++){
+    parts.push({x:Math.random()*cv.width,y:-20*d,vx:(Math.random()-.5)*5*d,vy:(2+Math.random()*5)*d,
+      s:(4+Math.random()*7)*d,c:pick(cols),r:Math.random()*6,vr:(Math.random()-.5)*.3,life:0});
+  }
+  if(!raf) raf=requestAnimationFrame(tick);
+}
+function tick(){
+  cx.clearRect(0,0,cv.width,cv.height);
+  parts.forEach(function(p){
+    p.x+=p.vx;p.y+=p.vy;p.vy+=.06*devicePixelRatio;p.r+=p.vr;p.life++;
+    cx.save();cx.translate(p.x,p.y);cx.rotate(p.r);cx.fillStyle=p.c;cx.fillRect(-p.s/2,-p.s/2,p.s,p.s*.6);cx.restore();
+  });
+  parts=parts.filter(function(p){return p.y<cv.height+30});
+  if(parts.length) raf=requestAnimationFrame(tick); else {raf=null;cx.clearRect(0,0,cv.width,cv.height)}
+}
+function clearConfetti(){parts=[];cx.clearRect(0,0,cv.width,cv.height)}
+
+/* ═════════ EVENTOS ═════════ */
+mainBtn.addEventListener("click",function(){
+  if(modalOpen) return;
+  if(phase==="welcome"||phase==="end") startGame();
+  else if(phase==="answered") next();
+});
+document.addEventListener("keydown",function(e){
+  if(modalOpen||e.ctrlKey||e.metaKey||e.altKey) return;
+  var k=e.key;
+  if(k==="Enter"){
+    if(phase==="welcome"||phase==="end"){e.preventDefault();startGame()}
+    else if(phase==="answered"){e.preventDefault();next()}
+    return;
+  }
+  if(phase==="question"){
+    var idx="abcd".indexOf(k.toLowerCase());
+    if(k.length===1 && idx>-1){e.preventDefault();answer(idx)}
+  }
+});
+
+$("totalInfo").textContent = N+" preguntas en total.";
+resetState();
+})();
+</script>
+</body>
+</html>
